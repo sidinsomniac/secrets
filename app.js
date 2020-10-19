@@ -3,24 +3,32 @@ const ejs = require('ejs');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const encryption = require('mongoose-encryption');
+
 
 const port = 3000;
+const secretKey = "7SFD87S6SXJ9G3"
 const app = express();
+
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
+
 
 mongoose.connect('mongodb://localhost:27017/userDB', { useNewUrlParser: true, useUnifiedTopology: true });
 const userSchema = new mongoose.Schema({
     email: String,
     password: String
 });
+userSchema.plugin(encryption, { secret: secretKey, encryptedFields: ['password'] });
 const User = mongoose.model("User", userSchema);
+
 
 app.get('/', (req, res) => {
     res.render('home');
 });
+
 
 app.route('/login')
     .get((req, res) => {
@@ -40,6 +48,7 @@ app.route('/login')
         });
     });
 
+
 app.route('/register')
     .get((req, res) => {
         res.render('register');
@@ -57,6 +66,8 @@ app.route('/register')
             }
         });
     });
+
+
 app.listen(process.env.PORT || port, () => {
     console.log("Server has started");
 });
